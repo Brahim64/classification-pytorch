@@ -1,0 +1,33 @@
+name: DVC
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  dvc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.8"
+
+      - name: Install dependencies
+        run: |
+          pip install dvc dvc[gdrive]
+
+      - name: Pull DVC data
+        run: |
+          dvc pull
+        env:
+          DVC_REMOTE_URL: ${{ secrets.DVC_REMOTE_URL }}
+
+      - name: Verify DVC pipeline
+        run: |
+          dvc repro
+
