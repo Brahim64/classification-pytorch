@@ -51,7 +51,6 @@ jobs:
         
       - name: Modify DVC Remote
         run: |
-          uv run dvc remote modify --local gdrive_remote gdrive_service_account_json_file_path credentials.json
           uv run dvc remote modify gdrive_remote gdrive_use_service_account true
           uv run dvc remote modify gdrive_remote gdrive_acknowledge_abuse true
           uv dvc remote modify dvc_remote gdrive_client_secret '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'
