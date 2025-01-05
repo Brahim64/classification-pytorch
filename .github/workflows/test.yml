@@ -47,7 +47,7 @@ jobs:
       # Configure DVC Remote
       - name: Configure DVC Remote
         run: |
-          uv run dvc remote add -d gdrive_remote gdrive://1YVw1B0o0_XyWP1_gRQ95Y2WnPVy7v-5J
+          uv run dvc remote add -d gdrive_remote gdrive://1YVw1B0o0_XyWP1_gRQ95Y2WnPVy7v-5J --force
         
       - name: Modify DVC Remote
         run: |
