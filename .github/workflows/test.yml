@@ -54,6 +54,10 @@ jobs:
           uv run dvc remote modify --local gdrive_remote gdrive_service_account_json_file_path credentials.json
           uv run dvc remote modify gdrive_remote gdrive_use_service_account true
           uv run dvc remote modify gdrive_remote gdrive_acknowledge_abuse true
+          uv dvc remote modify dvc_remote gdrive_client_secret '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'
+          uv dvc remote modify dvc_remote gdrive_client_id '1084516772566-k6nr4qkghdh39ad3m5e77btr0tl79aqq.apps.googleusercontent.com'
+
+
       - name: DVC Pull Data
         run: |
           uv run dvc pull
