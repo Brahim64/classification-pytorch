@@ -1,6 +1,9 @@
 import logging
 import os
 
+import mlflow
+import mlflow.pytorch
+
 import torch
 from torch.cuda.amp import GradScaler, autocast
 from torch.optim.lr_scheduler import StepLR
@@ -57,6 +60,15 @@ def train_classifier(model, train_loader, val_loader, criterion, optimizer, num_
 
     model.to(device)  # Move model to the device
 
+    # Start MLflow run
+    mlflow.start_run()
+
+    # Log hyperparameters
+    mlflow.log_param("epochs", num_epochs)
+    mlflow.log_param("learning_rate", optimizer.param_groups[0]["lr"])
+    mlflow.log_param("backbone", backbone)
+    mlflow.log_param("freeze_backbone", freeze_backbone)
+
     for epoch in range(num_epochs):
         # Training phase
         model.train()
@@ -78,9 +90,12 @@ def train_classifier(model, train_loader, val_loader, criterion, optimizer, num_
 
             total_train_loss += loss.item()
 
+        # Log the loss to MLflow
+        average_train_loss = total_train_loss / len(train_loader)
+        mlflow.log_metric("train_loss", average_train_loss)
+
         # Update learning rate
         scheduler.step()
-        average_train_loss = total_train_loss / len(train_loader)
         train_losses.append(average_train_loss)
 
         # Validation phase
@@ -109,11 +124,17 @@ def train_classifier(model, train_loader, val_loader, criterion, optimizer, num_
             # Save the best trained model
             filename = f'cnn_{backbone}_freeze_backbone_{freeze_backbone}'
             torch.save(model.state_dict(), os.path.join(model_dir, f"{filename}.pth"))
+            # Log model to MLflow
+            # input_example = torch.rand(1, *images.shape[1:]).to(device)  # Adjust shape as per your model's input
+            mlflow.pytorch.log_model(model, f"model_epoch_{epoch + 1}")
         else:
             counter += 1
             if counter >= patience:
                 logging.info(f'Validation loss did not improve for the last {patience} epochs. Stopping early.')
                 break
+
+    # End MLflow run
+    mlflow.end_run()
 
     # Plot loss curves
     plot_loss_curves(train_losses, val_losses, filename, plot_dir)
